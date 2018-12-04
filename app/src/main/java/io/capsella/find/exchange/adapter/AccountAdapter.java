@@ -31,9 +31,10 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Typeface robotoMedium;
     private Typeface robotoRegular;
 
-    private static final int TYPE_ACCOUNT_ADD = 0;
-    private static final int TYPE_ACCOUNT_MULTI_CURRENCY = 1;
-    private static final int TYPE_ACCOUNT_NORMAL = 2;
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_ACCOUNT_ADD = 1;
+    private static final int TYPE_ACCOUNT_MULTI_CURRENCY = 2;
+    private static final int TYPE_ACCOUNT_NORMAL = 3;
 
     public AccountAdapter(Context context, ArrayList<Account> itemArrayList) {
         this.context = context;
@@ -41,6 +42,24 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         robotoBold = Typeface.createFromAsset(context.getAssets(), "Roboto-Bold.ttf");
         robotoMedium = Typeface.createFromAsset(context.getAssets(), "Roboto-Medium.ttf");
         robotoRegular = Typeface.createFromAsset(context.getAssets(), "Roboto-Regular.ttf");
+    }
+
+    private class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        ConstraintLayout mainLayout;
+        TextView totalCardAmountLabel;
+        TextView totalCardAmountTxt;
+        TextView spentAmountTxt;
+        TextView myAccountsTxt;
+
+        private HeaderViewHolder(View itemView) {
+            super(itemView);
+            this.mainLayout = itemView.findViewById(R.id.main_layout);
+            this.totalCardAmountLabel = itemView.findViewById(R.id.total_card_amount_label);
+            this.totalCardAmountTxt = itemView.findViewById(R.id.total_card_amount_txt);
+            this.spentAmountTxt = itemView.findViewById(R.id.spent_amount);
+            this.myAccountsTxt = itemView.findViewById(R.id.my_accounts);
+        }
     }
 
     private class AddNewAccountViewHolder extends RecyclerView.ViewHolder {
@@ -108,7 +127,9 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemViewType(int position) {
 
-        if (position == itemArrayList.size() - 1) {
+        if (itemArrayList.get(position).getAccountType() == TYPE_HEADER) {
+            return TYPE_HEADER;
+        } else if (itemArrayList.get(position).getAccountType() == TYPE_ACCOUNT_ADD) {
             return TYPE_ACCOUNT_ADD;
         } else if (itemArrayList.get(position).getAccountType() == TYPE_ACCOUNT_MULTI_CURRENCY) {
             return TYPE_ACCOUNT_MULTI_CURRENCY;
@@ -119,7 +140,10 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_ACCOUNT_ADD) {
+        if (viewType == TYPE_HEADER) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_account_header, parent, false);
+            return new HeaderViewHolder(v);
+        } else if (viewType == TYPE_ACCOUNT_ADD) {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_account_add_item, parent, false);
             return new AddNewAccountViewHolder(v);
         } else if (viewType == TYPE_ACCOUNT_MULTI_CURRENCY) {
@@ -141,7 +165,12 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         final Account account = getItem(position);
 
-        if (holder instanceof AddNewAccountViewHolder) {
+        if (holder instanceof HeaderViewHolder) {
+
+            final HeaderViewHolder viewHolder = (HeaderViewHolder) holder;
+            initHeader(viewHolder);
+
+        } else if (holder instanceof AddNewAccountViewHolder) {
 
             final AddNewAccountViewHolder viewHolder = (AddNewAccountViewHolder) holder;
             initAddAccount(viewHolder);
@@ -163,6 +192,31 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return itemArrayList.size();
     }
 
+    private void initHeader(HeaderViewHolder viewHolder) {
+
+        viewHolder.totalCardAmountLabel.setTypeface(robotoMedium);
+        viewHolder.totalCardAmountTxt.setTypeface(robotoMedium);
+        viewHolder.spentAmountTxt.setTypeface(robotoRegular);
+        viewHolder.myAccountsTxt.setTypeface(robotoMedium);
+
+        //Set Header
+        int cardsCount = 2;
+        double totalCardAmount = 9566.15;
+        double spentAmount = 1322.47;
+        String currency = "£";
+
+        viewHolder.totalCardAmountLabel.setText(context.getResources().getString(R.string.total_card_amount_label, String.valueOf(cardsCount)));
+        viewHolder.totalCardAmountTxt.setText(getSizeSpannableText(currency + HelperFunctions.formatDecimal(String.valueOf(totalCardAmount))));
+        viewHolder.spentAmountTxt.setText(getFullSpannableText(context.getResources().getString(R.string.spent_amount, currency + HelperFunctions.formatDecimal(String.valueOf(spentAmount))), 1));
+
+        viewHolder.mainLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
     private void initAddAccount(AddNewAccountViewHolder viewHolder) {
         viewHolder.addNewAccount.setTypeface(robotoMedium);
         viewHolder.addNewAccount.setOnClickListener(new View.OnClickListener() {
@@ -182,7 +236,7 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         viewHolder.totalAmountTxt.setText(account.getCurrency() + " " + HelperFunctions.formatDecimal(account.getTotalAmount()));
         getSizeSpannableText(viewHolder.totalAmountTxt);
         viewHolder.noOfCurrenciesTxt.setText(context.getString(R.string.no_of_currencies, String.valueOf(account.getNoOfCurrencies())));
-        viewHolder.availableAmountTxt.setText(getFullSpannableText(context.getString(R.string.available_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getAvailableAmount()))));
+        viewHolder.availableAmountTxt.setText(getFullSpannableText(context.getString(R.string.available_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getAvailableAmount())), 2));
 
         viewHolder.currencyLabelTxt.setTypeface(robotoBold);
         viewHolder.accountNameTxt.setTypeface(robotoMedium);
@@ -205,8 +259,8 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         viewHolder.accountNameSubTxt.setText(account.getAccountNameSubTxt());
         viewHolder.totalAmountTxt.setText(account.getCurrency() + " " + HelperFunctions.formatDecimal(account.getTotalAmount()));
         getSizeSpannableText(viewHolder.totalAmountTxt);
-        viewHolder.availableAmountTxt.setText(getFullSpannableText(context.getString(R.string.available_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getAvailableAmount()))));
-        viewHolder.overdraftAmountTxt.setText(getFullSpannableText(context.getString(R.string.overdraft_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getOverdraftAmount()))));
+        viewHolder.availableAmountTxt.setText(getFullSpannableText(context.getString(R.string.available_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getAvailableAmount())), 2));
+        viewHolder.overdraftAmountTxt.setText(getFullSpannableText(context.getString(R.string.overdraft_amount, account.getCurrency() + HelperFunctions.formatDecimal(account.getOverdraftAmount())), 2));
 
         viewHolder.currencyLabelTxt.setTypeface(robotoBold);
         viewHolder.accountNameTxt.setTypeface(robotoMedium);
@@ -234,15 +288,34 @@ public class AccountAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         textView.setText(value);
     }
 
-    private SpannableString getFullSpannableText(String text) {
+    private SpannableString getSizeSpannableText(String text) {
+
+        SpannableString spannableString = new SpannableString(text);
+        RelativeSizeSpan sizeSpan = new RelativeSizeSpan(0.7f);
+        spannableString.setSpan(sizeSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return spannableString;
+    }
+
+    private SpannableString getFullSpannableText(String text, int type) {
 
         SpannableString spannableString = new SpannableString(text);
         ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(context.getResources().getColor(R.color.color_6));
         StyleSpan styleSpan = new StyleSpan(android.graphics.Typeface.BOLD);
         RelativeSizeSpan sizeSpan = new RelativeSizeSpan(0.7f);
-        spannableString.setSpan(foregroundColorSpan, 0, 9, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spannableString.setSpan(styleSpan, 10, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spannableString.setSpan(sizeSpan, 10, 11, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        switch (type) {
+            case 1:
+                spannableString.setSpan(foregroundColorSpan, 0, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spannableString.setSpan(styleSpan, 8, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spannableString.setSpan(sizeSpan, 8, 9, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+            case 2:
+                spannableString.setSpan(foregroundColorSpan, 0, 9, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spannableString.setSpan(styleSpan, 10, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spannableString.setSpan(sizeSpan, 10, 11, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                break;
+        }
 
         return spannableString;
     }

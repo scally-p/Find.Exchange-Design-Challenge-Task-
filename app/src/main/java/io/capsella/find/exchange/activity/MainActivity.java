@@ -1,5 +1,9 @@
 package io.capsella.find.exchange.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,6 +13,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.luseen.spacenavigation.SpaceItem;
 import com.luseen.spacenavigation.SpaceNavigationView;
@@ -21,6 +28,7 @@ import io.capsella.find.exchange.fragment.AccountsFragment;
 import io.capsella.find.exchange.fragment.CardFragment;
 import io.capsella.find.exchange.fragment.MarketFragment;
 import io.capsella.find.exchange.fragment.MoreFragment;
+import io.capsella.find.exchange.utility.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,9 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
     SpaceNavigationView spaceNavigationView;
     ViewPager viewPager;
+    View spaceNavigationViewShadow;
 
     ViewPagerAdapter viewPagerAdapter;
     private ArrayList<Fragment> fragments;
+    ToggleViewVisibilityBroadcastReceiver toggleViewVisibilityBroadcastReceiver;
 
     Typeface robotoMedium;
 
@@ -40,15 +50,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         robotoMedium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
+        toggleViewVisibilityBroadcastReceiver = new ToggleViewVisibilityBroadcastReceiver();
 
         initViews(savedInstanceState);
         initData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver(toggleViewVisibilityBroadcastReceiver, new IntentFilter(Constants.Broadcast_TOGGLE_VIEW_VISIBILITY_BROADCAST));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(toggleViewVisibilityBroadcastReceiver);
     }
 
     private void initViews(Bundle savedInstanceState) {
 
         //ViewPager
         viewPager = findViewById(R.id.view_pager);
+        spaceNavigationViewShadow = findViewById(R.id.space_navigation_view_shadow);
 
         //SpaceNavigationView
         spaceNavigationView = findViewById(R.id.space_navigation_view);
@@ -130,6 +154,24 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
     }
 
+    private void hideViews() {
+//        mToolbar.animate().translationY(-mToolbar.getHeight()).setInterpolator(new AccelerateInterpolator(2));
+
+//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mFabButton.getLayoutParams();
+//        int fabBottomMargin = lp.bottomMargin;
+//        mFabButton.animate().translationY(mFabButton.getHeight() + fabBottomMargin).setInterpolator(new AccelerateInterpolator(2)).start();
+
+        spaceNavigationViewShadow.setVisibility(View.GONE);
+        spaceNavigationView.animate().translationY(spaceNavigationView.getHeight()).setInterpolator(new DecelerateInterpolator(2)).start();
+    }
+
+    private void showViews() {
+//        mToolbar.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2));
+
+        spaceNavigationViewShadow.setVisibility(View.VISIBLE);
+        spaceNavigationView.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+    }
+
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         private ArrayList<Fragment> data;
 
@@ -146,6 +188,23 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             return data.get(position);
+        }
+    }
+
+    private class ToggleViewVisibilityBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(Constants.STATE, Constants.HIDE);
+
+            switch (state) {
+                case Constants.HIDE:
+                    hideViews();
+                    break;
+                case Constants.SHOW:
+                    showViews();
+                    break;
+            }
         }
     }
 }

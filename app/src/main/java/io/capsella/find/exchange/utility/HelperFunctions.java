@@ -45,9 +45,10 @@ public class HelperFunctions {
     public static ArrayList<Account> getDummyAccountsData() {
 
         ArrayList<Account> accounts = new ArrayList<>();
-        accounts.add(new Account(1, 1, "Multi-Currency", "£", R.drawable.account_logo_1, R.drawable.account_logo_3, "Account", "", "6725.21", 4, "6712.80", "0.0", false));
-        accounts.add(new Account(1, 2, "GBP", "£", R.drawable.account_logo_2, 0, "Classic Account", "78128321 | 44-62-11", "6725.14", 0, "1697.32", "2500.00", false));
-        accounts.add(new Account());
+        accounts.add(new Account(0, 0, "", "", 0, 0, "", "", "0.0", 0, "0.0", "0.0", false));
+        accounts.add(new Account(1, 2, "Multi-Currency", "£", R.drawable.account_logo_1, R.drawable.account_logo_3, "Account", "", "6725.21", 4, "6712.80", "0.0", false));
+        accounts.add(new Account(1, 3, "GBP", "£", R.drawable.account_logo_2, 0, "Classic Account", "78128321 | 44-62-11", "6725.14", 0, "1697.32", "2500.00", false));
+        accounts.add(new Account(0, 1, "", "", 0, 0, "", "", "0.0", 0, "0.0", "0.0", false));
 
         return accounts;
     }
