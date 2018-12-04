@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_accounts"
+        android:checked="true"
+        android:icon="@drawable/menu_accounts"
+        android:title="@string/accounts" />
+    <item
+        android:id="@+id/menu_card"
+        android:icon="@drawable/menu_card"
+        android:title="@string/card" />
+</menu>

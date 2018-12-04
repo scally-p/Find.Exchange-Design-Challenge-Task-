@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Find.Exchange</string>
+
+    <string name="accounts">Accounts</string>
+    <string name="card">Card</string>
+    <string name="market">Market</string>
+    <string name="more">More</string>
+
+    <string name="total_card_amount_label">Across All %1$s Accounts</string>
+    <string name="spent_amount">Spent - %1$s</string>
+    <string name="my_accounts">My Accounts</string>
+    <string name="add_new_account">Add New Account</string>
+    <string name="no_of_currencies">Across All %1$s Currencies</string>
+    <string name="available_amount">Available %1$s</string>
+    <string name="overdraft_amount">Overdraft %1$s</string>
+    <string name="no_transactions">You have transactions to categorise.</string>
+
+</resources>
